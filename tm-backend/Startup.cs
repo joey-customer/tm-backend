@@ -1,18 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Its.TM.Backend.Models;
 
-namespace tm_backend
+namespace Its.TM.Backend
 {
     public class Startup
     {
@@ -26,11 +22,17 @@ namespace tm_backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc(opt => {
+                opt.EnableEndpointRouting = false;
+            });
+            services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>(opt => {
+                opt.UseNpgsql(Configuration.GetConnectionString("DbConection"));
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "tm_backend", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TM-Backend", Version = "v1" });
             });
         }
 
@@ -41,19 +43,19 @@ namespace tm_backend
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "tm_backend v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TM-Backend v1"));
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
-
+/*
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+*/            
+            app.UseMvc();
         }
     }
 }
